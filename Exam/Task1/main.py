@@ -1,23 +1,17 @@
 import cv2
+import numpy as np
+from skimage import measure
 
-image = cv2.imread('task1.png')
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 3, 1)
+img = cv2.imread("task1.png", 0)
 
-contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-max_area = -1
-max_contour = None
-max_obj_i = -1
-for i, contour in enumerate(contours):
-    area = cv2.contourArea(contour)
-    print(f"Object{i}'s area: {area}")
-    if area > max_area:
-        max_obj_i = i
-        max_area = area
-        max_contour = contour
+bin_img = (img != 51).astype(np.uint8)
+_, connected_objs = cv2.connectedComponents(bin_img)
+objs = measure.regionprops(connected_objs)
 
-image_with_contour = cv2.drawContours(image, [max_contour], -1, (0, 255, 0), 2)
-print(f"The biggest Object{max_obj_i}'s area:", max_area)
-cv2.imshow(f"There is Object{max_obj_i}", image_with_contour)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+object_internal_areas = []
+for i in range(len(objs)):
+    internal_area = objs[i].area - objs[i].perimeter
+    print(f"Object{i}'s\n   area:{objs[i].area},\n   perimeter: {objs[i].perimeter},\n   internal area: {internal_area}")
+    object_internal_areas.append(internal_area)
+
+print(f"\nThe biggest internal area: {max(object_internal_areas)}")
