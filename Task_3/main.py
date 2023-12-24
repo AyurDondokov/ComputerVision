@@ -1,4 +1,5 @@
 import numpy as np
+from matplotlib import pyplot as plt
 from scipy.ndimage import binary_erosion
 
 
@@ -70,10 +71,19 @@ def two_pass_labeling(B):
 
 def main():
     img = np.load("stars.npy")
+    plt.imshow(img)
+    plt.show()
+    struct1 = [[1, 0, 0, 0, 1],
+               [0, 1, 0, 1, 0],
+               [0, 0, 1, 0, 0],
+               [0, 1, 0, 1, 0],
+               [1, 0, 0, 0, 1]]
 
-    struct1 = [[1, 0, 0, 0, 1], [0, 1, 0, 1, 0], [0, 0, 1, 0, 0], [0, 1, 0, 1, 0], [1, 0, 0, 0, 1]]
-    struct2 = [[0, 0, 1, 0, 0], [0, 0, 1, 0, 0], [1, 1, 1, 1, 1], [0, 0, 1, 0, 0], [0, 0, 1, 0, 0]]
-
+    struct2 = [[0, 0, 1, 0, 0],
+               [0, 0, 1, 0, 0],
+               [1, 1, 1, 1, 1],
+               [0, 0, 1, 0, 0],
+               [0, 0, 1, 0, 0]]
     i = 1
     for struct in (struct1, struct2):
         image = binary_erosion(img, struct)
