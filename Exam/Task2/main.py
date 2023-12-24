@@ -1,18 +1,20 @@
 import cv2
-import numpy as np
+import matplotlib.pyplot as plt
 
-image = cv2.imread("task2.png")
-hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+img = cv2.imread("task2.png")
+hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
-saturation = hsv_image[:, :, 1]
-max_saturation_idx = np.unravel_index(np.argmax(saturation), saturation.shape)
-center_pos = (max_saturation_idx[1], max_saturation_idx[0])
+max_saturation = 0
+for row in range(hsv_img.shape[0]):
+    for column in range(hsv_img.shape[1]):
+        if hsv_img[row, column][1] > max_saturation:
+            max_saturation = hsv_img[row, column][1]
 
-radius = 10
-mask = np.zeros_like(saturation)
-cv2.circle(mask, center_pos, radius, 255, -1)
-result = cv2.bitwise_and(image, image, mask=mask)
+for row in range(hsv_img.shape[0]):
+    for column in range(hsv_img.shape[1]):
+        if hsv_img[row, column][1] != max_saturation:
+            hsv_img[row, column] = [0, 0, 0]
 
-cv2.imshow("Result", result)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+rgb_img = cv2.cvtColor(hsv_img, cv2.COLOR_HSV2BGR)
+plt.imshow(rgb_img)
+plt.show()
