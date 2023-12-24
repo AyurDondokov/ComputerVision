@@ -1,37 +1,41 @@
-import cv2
 import numpy as np
+import matplotlib.pyplot as plt
+from skimage.measure import label, regionprops
 
-# Загрузка изображения
-image = cv2.imread('Task3.png')
 
-# Конвертация изображения в оттенки серого
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+def filling_factor(reg):
+    return reg.image.mean()
 
-# Бинаризация изображения (преобразование в черно-белое)
-_, threshold = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
-# Поиск контуров символов
-contours, _ = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+def recognize(reg):
+    euler = reg.euler_number
+    if euler == 0:
+        if 1 in reg.image.mean(1):
+            return "R"
+        else:
+            return "D"
+    else:
+        if 1 not in reg.image.mean(1):
+            return "K"
+        else:
+            if reg.image[0][0] == 1:
+                return "L"
+            else:
+                return "J"
 
-# Словарь для хранения количества символов
-character_counts = {}
 
-# Перебор контуров
-for contour in contours:
-    # Вычисление границ контура
-    x, y, w, h = cv2.boundingRect(contour)
+img = plt.imread('task3.png')
+binary = img.mean(2) > 0.25
 
-    # Выделение символа на изображении
-    character = gray[y:y+h, x:x+w]
+labeled = label(binary)
+print(f"Number of symbols: {np.max(labeled)}")
 
-    # Проверка, является ли символ достаточно большим
-    if w > 10 and h > 10:
-        # Ввод символа от пользователя
-        symbol = input(f'Введите символ для контура ({x}, {y}): ')
+regions = regionprops(labeled)
+counts = {}
+for region in regions:
+    symbol = recognize(region)
+    if symbol not in counts:
+        counts[symbol] = 0
+    counts[symbol] += 1
 
-        # Обновление счетчика символов
-        character_counts[symbol] = character_counts.get(symbol, 0) + 1
-
-# Вывод результатов
-for symbol, count in character_counts.items():
-    print(f'Символ {symbol}: {count} шт.')
+print(f"All symbols:\n{counts}")
